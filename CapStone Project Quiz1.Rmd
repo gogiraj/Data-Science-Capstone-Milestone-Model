@@ -1,0 +1,132 @@
+---
+title: "Data Science Capstone Milestone Model"
+author: "Gagan Deep Singh Chhabra"
+date: "July 3, 2017"
+output: html_document
+---
+
+### Goal of Project ...
+
+The goal here is to build your first simple model for the relationship between words. This is the first step in building a predictive text mining application. You will explore simple models and discover more complicated modeling techniques.
+
+### Tasks to perform
+
+Build basic n-gram model - using the exploratory analysis you performed, build a basic n-gram model for predicting the next word based on the previous 1, 2, or 3 words. Build a model to handle unseen n-grams - in some cases people will want to type a combination of words that does not appear in the corpora. Build a model to handle cases where a particular n-gram isn't observed.
+
+#### Dataset
+Download from Coursera: https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
+
+### Library Required
+```{r}
+library(tm)
+```
+
+### Quiz 1:
+1.The en_US.blogs.txt file is how many megabytes? 
+
+Ans: <200MB>. Right Click on the the file and click on properties to check the size of the file.
+
+2.The en_US.twitter.txt has how many lines of text? 
+
+Ans: <Is Over 2 million>
+```{r}
+twitter <- readLines(con <- file("D:/DataScientist/10. Cap Stone Project/Coursera-SwiftKey/final/en_US/en_US.twitter.txt"), encoding = "UTF-8", skipNul = TRUE)
+close(con)
+```
+### Checking the length
+```{r}
+length(twitter)
+```
+
+3.What is the length of the longest line seen in any of the three en_US data sets? 
+
+Ans: <Is Over 40 thousand in the blogs data set> Read in the lines to arrays:
+```{r}
+fileName="D:/DataScientist/10. Cap Stone Project/Coursera-SwiftKey/final/en_US/en_US.blogs.txt"
+con=file(fileName,open="r")
+lineBlogs=readLines(con) 
+longBlogs=length(line)
+close(con)
+
+fileName="D:/DataScientist/10. Cap Stone Project/Coursera-SwiftKey/final/en_US/en_US.news.txt"
+con=file(fileName,open="r")
+lineNews=readLines(con) 
+longNews=length(line)
+close(con)
+
+fileName="D:/DataScientist/10. Cap Stone Project/Coursera-SwiftKey/final/en_US/en_US.twitter.txt"
+con=file(fileName,open="r")
+lineTwitter=readLines(con) 
+longTwitter=length(line)
+close(con)
+
+longBlogs = nchar(longBlogs)
+max(nchar(longBlogs))
+
+require(stringi)
+longBlogs<-stri_length(lineBlogs)
+max(longBlogs)
+
+longNews<-stri_length(lineNews)
+max(longNews)
+
+longTwitter<-stri_length(lineTwitter)
+max(longTwitter)
+```
+
+4.In the en_US twitter data set, if you divide the number of lines where the word "love" (all lowercase) occurs by the number of lines the word "hate" (all lowercase) occurs, about what do you get?
+
+Ans: <4> Get count of lines with "love" (case-sensitive), store in variable grep?
+```{r}
+# Word "love"
+loveTwitter<-grep("love",lineTwitter)
+lenlt <- length(loveTwitter)
+# Word "hate"
+hateTwitter<-grep("hate",lineTwitter)
+lenht <- length(hateTwitter)
+lenlt / lenht
+```
+5.The one tweet in the en_US twitter data set that matches the word "biostats" says what? As below
+
+Ans: <They haven't studied for their biostats exam>
+```{r}
+biostatsTwitter<-grep("biostats",lineTwitter)
+lineTwitter[biostatsTwitter]
+```
+6.How many tweets have the exact characters "A computer once beat me at chess, but it was no match for me at kickboxing". (I.e. the line matches those characters exactly.)
+
+Ans: <3>
+```{r}
+sentenceTwitter<-grep("A computer once beat me at chess, but it was no match for me at kickboxing",lineTwitter)
+length(sentenceTwitter)
+```
+
+###2.Data Cleaning
+n-gram model (think Markov Chains)
+```{r}
+# Remove all weird characters
+cleanedTwitter<- iconv(twitter, 'UTF-8', 'ASCII', "byte")
+# Sample 10000 
+twitterSample<-sample(cleanedTwitter, 10000)
+doc.vec <- VectorSource(twitterSample)                      
+doc.corpus <- Corpus(doc.vec)
+#Convert to lower case
+doc.corpus<- tm_map(doc.corpus, tolower)
+#Remove all punctuatins
+doc.corpus<- tm_map(doc.corpus, removePunctuation)
+#Remove all numbers 
+doc.corpus<- tm_map(doc.corpus, removeNumbers)
+#Remove whitespace
+doc.corpus <- tm_map(doc.corpus, stripWhitespace)
+#Force everything back to plaintext document
+doc.corpus <- tm_map(doc.corpus, PlainTextDocument)
+```
+### 3.Exploratory Analysis
+#### Visualize using wordcloud
+```{r}
+library(wordcloud)
+wordcloud(doc.corpus, max.words = 200, random.order = FALSE,rot.per=0.35, use.r.layout=FALSE,colors=brewer.pal(8, "Dark2"))
+```
+
+### 4.Future NLP project
+This coming project is to be continue with building a predictive model. n-grams model (think Markov Chains) will be used to tokenize the words & frequency of tokens will be used in building the model. Finally a shiny app that will predict the next word following a given word typed in by user as input will be developed as a data product. And can run the predictive model much more faster.
